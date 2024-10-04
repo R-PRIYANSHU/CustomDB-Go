@@ -1,16 +1,17 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QStatusBar
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
+                            QPushButton, QLineEdit, QLabel, QStatusBar, QFormLayout)
 from PyQt5.QtCore import Qt
 
 class KVStoreGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.dark_mode = False  # Initially set dark mode to False
+        self.dark_mode = False
         self.init_ui()
 
     def init_ui(self):
         # Set the window title and size
-        self.setWindowTitle("Key-Value Store GUI - Basic Version")
+        self.setWindowTitle("Key-Value Store GUI - Step 3")
         self.setGeometry(100, 100, 500, 400)
 
         # Central widget and layout
@@ -24,6 +25,20 @@ class KVStoreGUI(QMainWindow):
         self.dark_mode_button = QPushButton("Toggle Dark Mode")
         self.dark_mode_button.clicked.connect(self.toggle_dark_mode)
         main_layout.addWidget(self.dark_mode_button)
+
+        # Form layout for the key input and label
+        form_layout = QFormLayout()
+        
+        self.key_input = QLineEdit()
+        self.key_input.setPlaceholderText("Enter key here...")
+        form_layout.addRow(QLabel("Enter Key:"), self.key_input)
+
+        main_layout.addLayout(form_layout)
+
+        # Enter button to simulate key submission
+        self.enter_button = QPushButton("Enter Key")
+        self.enter_button.clicked.connect(self.enter_key)
+        main_layout.addWidget(self.enter_button)
 
         # Status bar
         self.status_bar = QStatusBar()
@@ -54,6 +69,13 @@ class KVStoreGUI(QMainWindow):
                 QPushButton:hover {
                     background-color: #81A1C1;
                 }
+                QLineEdit {
+                    background-color: #3B4252;
+                    color: #ECEFF4;
+                    border: 1px solid #4C566A;
+                    border-radius: 4px;
+                    padding: 5px;
+                }
                 QStatusBar {
                     background-color: #4C566A;
                     color: #ECEFF4;
@@ -63,6 +85,13 @@ class KVStoreGUI(QMainWindow):
         else:
             self.setStyleSheet("")  # Reset to default style
             self.status_bar.showMessage("Dark mode disabled")
+
+    def enter_key(self):
+        key = self.key_input.text()
+        if key:
+            self.status_bar.showMessage(f"Key '{key}' entered", 3000)
+        else:
+            self.status_bar.showMessage("No key entered!", 3000)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
