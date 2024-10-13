@@ -1,20 +1,24 @@
 import sys
+import json
 import requests
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QPushButton, QLineEdit, QLabel, QStatusBar, QFormLayout, QComboBox)
+                             QPushButton, QLineEdit, QLabel, QStatusBar, QFormLayout, 
+                             QComboBox, QTableWidget, QTableWidgetItem, QSplitter)
 from PyQt5.QtCore import Qt
+from datetime import datetime
 
 class KVStoreGUI(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    def _init_(self):
+        super()._init_()
         self.dark_mode = False
-        self.server_url = "http://localhost:8080"  # URL for server operations
+        self.server_url = "http://localhost:8080"
+        self.table_data = []  # Store all operations history
         self.init_ui()
 
     def init_ui(self):
         # Set the window title and size
         self.setWindowTitle("Key-Value Store GUI - Enhanced")
-        self.setGeometry(100, 100, 500, 400)
+        self.setGeometry(100, 100, 900, 600)
 
         # Central widget and layout
         central_widget = QWidget()
@@ -28,36 +32,64 @@ class KVStoreGUI(QMainWindow):
         self.dark_mode_button.clicked.connect(self.toggle_dark_mode)
         main_layout.addWidget(self.dark_mode_button)
 
-        # Form layout for the key and value input
-        form_layout = QFormLayout()
-        
-        self.key_input = QLineEdit()
-        self.key_input.setPlaceholderText("Enter key here...")
-        form_layout.addRow(QLabel("Enter Key:"), self.key_input)
+        # Create a splitter for resizable areas
+        splitter = QSplitter(Qt.Vertical)
+        main_layout.addWidget(splitter)
 
-        self.value_input = QLineEdit()
-        self.value_input.setPlaceholderText("Enter value here...")
-        form_layout.addRow(QLabel("Enter Value:"), self.value_input)
-
-        main_layout.addLayout(form_layout)
+        # Input section
+        input_widget = QWidget()
+        input_layout = QVBoxLayout()
+        input_widget.setLayout(input_layout)
 
         # Operation selection
         self.op_combo = QComboBox()
-        self.op_combo.addItems(["set", "get", "del"])  # Add 'get' and 'delete' options
-        main_layout.addWidget(QLabel("Select Operation:"))
-        main_layout.addWidget(self.op_combo)
+        self.op_combo.addItems(["set", "get", "del"])
+        input_layout.addWidget(QLabel("Select Operation:"))
+        input_layout.addWidget(self.op_combo)
 
-        # Enter button to simulate key submission
-        self.enter_button = QPushButton("Execute Operation")
-        self.enter_button.clicked.connect(self.execute_operation)
-        main_layout.addWidget(self.enter_button)
+        # Key input
+        self.key_input = QLineEdit()
+        self.key_input.setPlaceholderText("Enter key here...")
+        input_layout.addWidget(QLabel("Enter Key:"))
+        input_layout.addWidget(self.key_input)
+
+        # Value input (only for 'set' operation)
+        self.value_input = QLineEdit()
+        self.value_input.setPlaceholderText("Enter value here...")
+        input_layout.addWidget(QLabel("Enter Value (for set operation):"))
+        input_layout.addWidget(self.value_input)
+
+        # Execute button
+        self.execute_button = QPushButton("Execute Operation")
+        self.execute_button.clicked.connect(self.execute_operation)
+        input_layout.addWidget(self.execute_button)
+
+        # Clear history button
+        self.clear_button = QPushButton("Clear History")
+        self.clear_button.clicked.connect(self.clear_table)
+        input_layout.addWidget(self.clear_button)
+
+        splitter.addWidget(input_widget)
+
+        # Output section
+        output_widget = QWidget()
+        output_layout = QVBoxLayout()
+        output_widget.setLayout(output_layout)
+
+        # Table for operation history
+        self.result_table = QTableWidget()
+        self.result_table.setColumnCount(4)
+        self.result_table.setHorizontalHeaderLabels(['Timestamp', 'Operation', 'Key', 'Value'])
+        output_layout.addWidget(self.result_table)
+
+        splitter.addWidget(output_widget)
 
         # Status bar
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Ready")
 
-        # Apply initial style
+        # Apply initial styles
         self.apply_style()
 
     def toggle_dark_mode(self):
@@ -71,90 +103,88 @@ class KVStoreGUI(QMainWindow):
                     background-color: #2E3440;
                     color: #ECEFF4;
                 }
+                QTableWidget {
+                    background-color: #3B4252;
+                    color: #ECEFF4;
+                    gridline-color: #4C566A;
+                }
                 QPushButton {
                     background-color: #5E81AC;
                     color: #ECEFF4;
-                    border: none;
-                    padding: 5px 15px;
-                    border-radius: 4px;
                 }
-                QPushButton:hover {
-                    background-color: #81A1C1;
-                }
-                QLineEdit {
-                    background-color: #3B4252;
+                QLabel {
                     color: #ECEFF4;
-                    border: 1px solid #4C566A;
-                    border-radius: 4px;
-                    padding: 5px;
                 }
                 QStatusBar {
                     background-color: #4C566A;
                     color: #ECEFF4;
                 }
             """)
-            self.status_bar.showMessage("Dark mode enabled")
         else:
-            self.setStyleSheet("")  # Reset to default style
-            self.status_bar.showMessage("Dark mode disabled")
+            self.setStyleSheet("")
 
     def execute_operation(self):
-        key = self.key_input.text().strip()
-        value = self.value_input.text().strip()
         operation = self.op_combo.currentText()
-
+        key = self.key_input.text()
         if operation == "set":
+            value = self.value_input.text()
             if not key or not value:
-                self.status_bar.showMessage("Key and Value cannot be empty!", 3000)
+                self.status_bar.showMessage("Key and Value must be provided for SET operation!", 3000)
                 return
-
-            try:
-                response = requests.post(f"{self.server_url}/set", json={"key": key, "value": value})
-                if response.status_code == 200:
-                    self.status_bar.showMessage(f"SET operation successful: {key} = {value}", 3000)
-                    self.key_input.clear()
-                    self.value_input.clear()
-                else:
-                    self.status_bar.showMessage(f"Error: {response.status_code}", 3000)
-            except requests.exceptions.ConnectionError:
-                self.status_bar.showMessage("Error: Cannot connect to the server. Is it running?", 3000)
-
+            self.make_request("set", key, value)
         elif operation == "get":
             if not key:
-                self.status_bar.showMessage("Key cannot be empty for GET operation!", 3000)
+                self.status_bar.showMessage("Key must be provided for GET operation!", 3000)
                 return
+            self.make_request("get", key)
+        elif operation == "del":
+            if not key:
+                self.status_bar.showMessage("Key must be provided for DELETE operation!", 3000)
+                return
+            self.make_request("del", key)
 
-            try:
+    def make_request(self, operation, key, value=None):
+        try:
+            if operation == "set":
+                response = requests.post(f"{self.server_url}/set", json={"key": key, "value": value})
+                if response.status_code == 200:
+                    self.add_to_table(operation.upper(), key, value)
+                else:
+                    raise Exception(f"Server error: {response.status_code}")
+            elif operation == "get":
                 response = requests.get(f"{self.server_url}/get/{key}")
                 if response.status_code == 200:
                     data = response.json()
-                    self.status_bar.showMessage(f"GET operation successful: {data['key']} = {data['value']}", 3000)
-                elif response.status_code == 404:
-                    self.status_bar.showMessage("Key not found!", 3000)
+                    self.add_to_table(operation.upper(), key, data['value'])
                 else:
-                    self.status_bar.showMessage(f"Error: {response.status_code}", 3000)
-            except requests.exceptions.ConnectionError:
-                self.status_bar.showMessage("Error: Cannot connect to the server. Is it running?", 3000)
-
-        elif operation == "del":
-            if not key:
-                self.status_bar.showMessage("Key cannot be empty for DELETE operation!", 3000)
-                return
-
-            try:
+                    raise Exception("Key not found")
+            elif operation == "del":
                 response = requests.delete(f"{self.server_url}/del/{key}")
                 if response.status_code == 200:
-                    data = response.json()
-                    if data.get("deleted", False):
-                        self.status_bar.showMessage(f"DELETE operation successful: {key} deleted", 3000)
-                    else:
-                        self.status_bar.showMessage("Key not found for deletion!", 3000)
+                    self.add_to_table(operation.upper(), key, "Deleted")
                 else:
-                    self.status_bar.showMessage(f"Error: {response.status_code}", 3000)
-            except requests.exceptions.ConnectionError:
-                self.status_bar.showMessage("Error: Cannot connect to the server. Is it running?", 3000)
+                    raise Exception("Key not found")
+        except requests.exceptions.ConnectionError:
+            self.status_bar.showMessage("Server connection error", 3000)
+        except Exception as e:
+            self.status_bar.showMessage(f"Error: {str(e)}", 3000)
 
-if __name__ == "__main__":
+    def add_to_table(self, operation, key, value):
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        row_position = self.result_table.rowCount()
+        self.result_table.insertRow(row_position)
+        self.result_table.setItem(row_position, 0, QTableWidgetItem(timestamp))
+        self.result_table.setItem(row_position, 1, QTableWidgetItem(operation))
+        self.result_table.setItem(row_position, 2, QTableWidgetItem(key))
+        self.result_table.setItem(row_position, 3, QTableWidgetItem(str(value)))
+        self.status_bar.showMessage(f"Operation {operation} executed", 3000)
+
+    def clear_table(self):
+        self.result_table.setRowCount(0)
+        self.status_bar.showMessage("History cleared", 3000)
+
+
+if __name__ == "_main_":
     app = QApplication(sys.argv)
     window = KVStoreGUI()
     window.show()
