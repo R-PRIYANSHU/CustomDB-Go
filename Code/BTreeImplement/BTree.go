@@ -1,6 +1,5 @@
 package BTreeImplement
 
-
 import (
 )
 
@@ -54,3 +53,36 @@ type BTree struct {
     mockNodeList []BTNode   // for testing usage
 }
 
+
+func init() { 
+    node1max := HEADER + 8 + 2 + 4 + BTREE_MAX_KEY_SIZE + BTREE_MAX_VALUE_SIZE
+    Utils.Assert(node1max <= BTREE_PAGE_SIZE)
+}
+
+// decoding BTNode
+// header 
+func (node BTNode) btype() uint16 {
+    return binary.LittleEndian.Uint16(node.Data)    
+}
+
+func (node BTNode) nkeys() uint16 {
+    return binary.LittleEndian.Uint16(node.Data[2:4])
+}
+
+func (node BTNode) setHeader(btype uint16, nkeys uint16) {
+    binary.LittleEndian.PutUint16(node.Data, btype)
+    binary.LittleEndian.PutUint16(node.Data[2:4], nkeys)
+}
+
+// pointers
+func (node BTNode) getPtr(idx uint16) uint64 {
+    Utils.Assert(idx < node.nkeys())
+    index := HEADER + idx * 8
+    return binary.LittleEndian.Uint64(node.Data[index:])
+}
+
+func (node BTNode) setPtr(idx uint16, ptr uint64) {
+    Utils.Assert(idx < node.nkeys());
+    index := HEADER + idx * 8
+    binary.LittleEndian.PutUint64(node.Data[index:], ptr);
+}
