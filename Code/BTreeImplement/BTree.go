@@ -86,3 +86,14 @@ func (node BTNode) setPtr(idx uint16, ptr uint64) {
     index := HEADER + idx * 8
     binary.LittleEndian.PutUint64(node.Data[index:], ptr);
 }
+
+
+// The offset is relative to the position of the first KV pair.
+// The offset of the first KV pair is always zero, so it is not stored in the 
+// list. 
+
+// important: 
+// We store the offset to the end of the last KV pair in the offset list,
+// which is used to determine the size of the node.
+// |1st node offset| ... |n - 1th node offset| end of node offset|
+// there are n offset nums in offset list
