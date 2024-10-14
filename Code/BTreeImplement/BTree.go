@@ -97,3 +97,23 @@ func (node BTNode) setPtr(idx uint16, ptr uint64) {
 // which is used to determine the size of the node.
 // |1st node offset| ... |n - 1th node offset| end of node offset|
 // there are n offset nums in offset list
+
+
+func offsetPosition(node BTNode, idx uint16) uint16 {
+    Utils.Assert(1 <= idx && idx <= node.nkeys())
+    nkeys := node.nkeys()
+    return HEADER + nkeys * 8 + (idx - 1) * 2
+}
+
+func (node BTNode) getOffset(idx uint16) uint16 {
+    if idx == 0 {
+        return 0
+    }
+    position := offsetPosition(node, idx)
+    return binary.LittleEndian.Uint16(node.Data[position:])
+}
+
+func (node BTNode) setOffset(idx uint16, offset uint16) {
+    position := offsetPosition(node, idx)
+    binary.LittleEndian.PutUint16(node.Data[position:], offset)
+}
