@@ -7,6 +7,7 @@ class KVStoreGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.dark_mode = False
+        self.kv_store = {}  # Initialize a dictionary for key-value pairs
         self.init_ui()
 
     def init_ui(self):
@@ -26,18 +27,22 @@ class KVStoreGUI(QMainWindow):
         self.dark_mode_button.clicked.connect(self.toggle_dark_mode)
         main_layout.addWidget(self.dark_mode_button)
 
-        # Form layout for the key input and label
+        # Form layout for the key and value input
         form_layout = QFormLayout()
         
         self.key_input = QLineEdit()
         self.key_input.setPlaceholderText("Enter key here...")
         form_layout.addRow(QLabel("Enter Key:"), self.key_input)
 
+        self.value_input = QLineEdit()
+        self.value_input.setPlaceholderText("Enter value here...")
+        form_layout.addRow(QLabel("Enter Value:"), self.value_input)
+
         main_layout.addLayout(form_layout)
 
         # Enter button to simulate key submission
-        self.enter_button = QPushButton("Enter Key")
-        self.enter_button.clicked.connect(self.enter_key)
+        self.enter_button = QPushButton("Enter Key-Value Pair")
+        self.enter_button.clicked.connect(self.enter_key_value)
         main_layout.addWidget(self.enter_button)
 
         # Status bar
@@ -86,12 +91,16 @@ class KVStoreGUI(QMainWindow):
             self.setStyleSheet("")  # Reset to default style
             self.status_bar.showMessage("Dark mode disabled")
 
-    def enter_key(self):
+    def enter_key_value(self):
         key = self.key_input.text()
-        if key:
-            self.status_bar.showMessage(f"Key '{key}' entered", 3000)
-        else:
+        value = self.value_input.text()
+        if key and value:
+            self.kv_store[key] = value  # Store the key-value pair
+            self.status_bar.showMessage(f"Key '{key}' with value '{value}' entered", 3000)
+        elif not key:
             self.status_bar.showMessage("No key entered!", 3000)
+        elif not value:
+            self.status_bar.showMessage("No value entered!", 3000)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
