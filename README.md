@@ -14,3 +14,25 @@ This project implements a basic key-value store using a B-tree for indexing. It 
 * **Page management:** Implements page allocation, deallocation, and persistence.
 * **Master page:** Stores metadata like the root of the B-tree and used page count.
 
+## Project Structure
+
+```txt
+├── Code
+│   ├── BTreeImplement
+│   │   ├── BTree.go
+│   │   ├── Commons.go
+│   │   ├── Delete.go
+│   │   ├── Get.go
+│   │   └── Insert.go
+│   ├── KVStoreImplement
+│   │   ├── KVStore.go
+│   │   ├── KVUtils.go
+│   │   └── Master.go
+│   └── Utils
+│       └── Utils.go
+├── Sqlite.db
+├── go.mod
+├── go.sum
+├── main.go
+└── tree.py
+```
