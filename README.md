@@ -2,6 +2,9 @@
 
 A simple key-value store database implemented in Go.
 
+<img src="https://miro.medium.com/v2/resize:fit:860/1*Y9G_TqTbTq2khs7L4j_9_w.png" alt="Go-Lang logo" width="300" height="200">
+
+
 ## Overview
 
 This project implements a basic key-value store using a B-tree for indexing. It utilizes memory mapping for efficient disk access and supports basic operations like `Get`, `Set`, and `Delete`.
