@@ -2,25 +2,26 @@ package main
 
 import (
 	"fmt"
-	"github.com/ayush-git-hub/CustomDB/Code/KVStoreImplement"
-	"github.com/briandowns/spinner"
-	"github.com/fatih/color"
-	"github.com/common-nighthawk/go-figure"
 	"strings"
 	"time"
+
+	"github.com/ayush-git-hub/CustomDB/Code/KVStoreImplement"
+	"github.com/briandowns/spinner"
+	"github.com/common-nighthawk/go-figure"
+	"github.com/fatih/color"
 )
 
 const PATH string = "./Sqlite.db"
 
 var (
 	// Enhanced color functions
-	success = color.New(color.FgGreen, color.Bold).SprintFunc()
-	failure = color.New(color.FgRed, color.Bold).SprintFunc()
-	info    = color.New(color.FgCyan, color.Bold).SprintFunc()
-	prompt  = color.New(color.FgYellow, color.Bold).SprintFunc()
-	header  = color.New(color.FgMagenta, color.Bold).SprintFunc()
+	success   = color.New(color.FgGreen, color.Bold).SprintFunc()
+	failure   = color.New(color.FgRed, color.Bold).SprintFunc()
+	info      = color.New(color.FgCyan, color.Bold).SprintFunc()
+	prompt    = color.New(color.FgYellow, color.Bold).SprintFunc()
+	header    = color.New(color.FgMagenta, color.Bold).SprintFunc()
 	highlight = color.New(color.FgHiWhite, color.Bold).SprintFunc()
-	
+
 	// Enhanced symbols
 	tickMark  = success("✓")
 	crossMark = failure("✗")
@@ -41,13 +42,13 @@ func showBanner() {
 	// Create ASCII art banner
 	myFigure := figure.NewFigure("CustomDB", "isometric1", true)
 	bannerText := myFigure.String()
-	
+
 	decorativeLine := strings.Repeat(string(diamond), 50)
-	
+
 	fmt.Println(header(decorativeLine))
 	fmt.Println(info(bannerText))
 	fmt.Println(header(decorativeLine))
-	
+
 	subTitle := figure.NewFigure("In Golang", "small", true)
 	fmt.Println(prompt(subTitle.String()))
 }
@@ -82,10 +83,10 @@ func showStatus(message string, isError bool) {
 
 func main() {
 	showBanner()
-	
+
 	s := showSpinner("Initializing CustomDB...")
 	time.Sleep(1 * time.Second) // Add slight delay for visual effect
-	
+
 	db := KVStoreImplement.KV{Path: PATH}
 	if err := db.Open(); err != nil {
 		s.Stop()
@@ -94,7 +95,7 @@ func main() {
 	}
 	s.Stop()
 	showStatus("Database initialized successfully", false)
-	
+
 	defer db.Close()
 
 	showMenu()
@@ -136,7 +137,7 @@ func set(db *KVStoreImplement.KV) {
 
 	s := showSpinner("Setting key-value pair...")
 	time.Sleep(500 * time.Millisecond) // Add slight delay for visual effect
-	
+
 	if err := db.Set([]byte(key), []byte(val)); err != nil {
 		s.Stop()
 		showStatus("Failed to set key-value pair: "+err.Error(), true)
@@ -153,7 +154,7 @@ func get(db *KVStoreImplement.KV) {
 
 	s := showSpinner("Retrieving value...")
 	time.Sleep(500 * time.Millisecond) // Add slight delay for visual effect
-	
+
 	val, found := db.Get([]byte(key))
 	s.Stop()
 
@@ -171,7 +172,7 @@ func del(db *KVStoreImplement.KV) {
 
 	s := showSpinner("Deleting key...")
 	time.Sleep(500 * time.Millisecond) // Add slight delay for visual effect
-	
+
 	deleted, err := db.Del([]byte(key))
 	s.Stop()
 
