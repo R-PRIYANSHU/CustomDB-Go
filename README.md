@@ -20,22 +20,84 @@ This project implements a basic key-value store using a B-tree for indexing. It 
 ## Project Structure
 
 ```txt
+.
 ├── Code
 │   ├── BTreeImplement
-│   │   ├── BTree.go
-│   │   ├── Commons.go
-│   │   ├── Delete.go
-│   │   ├── Get.go
-│   │   └── Insert.go
+│   │   ├── BTree.go       # Main B-Tree structure
+│   │   ├── Commons.go     # Common utilities for B-Tree
+│   │   ├── Delete.go      # Deletion functionality for B-Tree
+│   │   ├── Get.go         # Retrieval functionality for B-Tree
+│   │   └── Insert.go      # Insert functionality for B-Tree
 │   ├── KVStoreImplement
-│   │   ├── KVStore.go
-│   │   ├── KVUtils.go
-│   │   └── Master.go
+│   │   ├── KVStore.go     # Key-Value store implementation
+│   │   ├── KVUtils.go     # Utility functions for Key-Value store
+│   │   └── Master.go      # Master control for Key-Value operations
 │   └── Utils
-│       └── Utils.go
-├── Sqlite.db
-├── go.mod
-├── go.sum
-├── main.go
-└── tree.py
+│       └── Utils.go       # General utility functions
+├── go.mod                 # Golang module information
+├── go.sum                 # Dependency file
+├── main.go                # Main entry point of the application
+├── oldmain                # Archive of older code
+└── Sqlite.db              # Sample SQLite database
+
 ```
+
+## Installation
+
+### Prerequisites
+- **Golang**: Make sure Golang is installed on your machine (version 1.17 or higher).
+- **Git**: Clone this repository.
+
+### Steps
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/custom-sqlite-query-processor.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd custom-sqlite-query-processor
+   ```
+3. Install the dependencies:
+   ```bash
+   go mod tidy
+   ```
+4. Run the project:
+   ```bash
+   go run main.go
+   ```
+
+---
+
+## Usage
+
+- The B-Tree structure provides fast and efficient insert, delete, and search operations.
+- The Key-Value store enables users to store and retrieve data in a key-value pair format.
+- The backend is optimized to handle large datasets and complex queries.
+
+### Example Commands:
+```go
+// Inserting a key-value pair into the B-Tree
+Insert(key, value)
+
+// Retrieving a value by key
+Get(key)
+
+// Deleting a key-value pair
+Delete(key)
+
+// Getall  function to retrieve all key-value pairs
+GetAll()
+
+```
+
+---
+
+## OOP Concepts Applied
+
+- **Encapsulation**: Structs like `BTNode` encapsulate the data of B-tree nodes.
+- **Abstraction**: B-tree and key-value store operations abstract the underlying data handling mechanisms.
+- **Composition**: Go uses composition to reuse struct functionality instead of traditional inheritance.
+- **Polymorphism**: Implemented through interfaces to allow different data structures to use the same operations.
+
+---
+
